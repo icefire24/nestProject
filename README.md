@@ -50,3 +50,5 @@ nest start
 
 那 --config 是指定nest cli 的配置文件
 
+### 数据传输
+dto 是 data transfer object，就是用于封装传输的数据的对象

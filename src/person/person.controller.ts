@@ -1,4 +1,13 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Post,
+  Body,
+  Patch,
+  Param,
+  Delete,
+  Query,
+} from '@nestjs/common';
 import { PersonService } from './person.service';
 import { CreatePersonDto } from './dto/create-person.dto';
 import { UpdatePersonDto } from './dto/update-person.dto';
@@ -7,8 +16,9 @@ import { UpdatePersonDto } from './dto/update-person.dto';
 export class PersonController {
   constructor(private readonly personService: PersonService) {}
 
-  @Post()
+  @Post('add')
   create(@Body() createPersonDto: CreatePersonDto) {
+    console.log('createPersonDto: ', createPersonDto);
     return this.personService.create(createPersonDto);
   }
 
@@ -17,8 +27,8 @@ export class PersonController {
     return this.personService.findAll();
   }
 
-  @Get(':id')
-  findOne(@Param('id') id: string) {
+  @Get('find')
+  findOne(@Query('id') id: string) {
     return this.personService.findOne(+id);
   }
 
