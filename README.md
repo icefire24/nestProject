@@ -115,6 +115,72 @@ class AppController implements OnModuleInit, OnApplicationBootstrap {
 AOP 是 Aspect Oriented Programming 的缩写，意思是面向切面编程，是一种编程范式，它的核心思想是将与业务无关的功能抽离出来，比如日志、监控、缓存、权限等，然后通过动态代理的方式注入到业务中，这样就可以在不改变业务代码的情况下，实现这些功能。
 Nest 实现 AOP 的方式更多，一共有五种，包括 Middleware、Guard、Pipe、Interceptor、ExceptionFilter：、
 **Middleware** 全局中间件、路由中间件
+```
+@Injectable()
+export class LoggerMiddleware implements NestMiddleware {
+  use(req: Request, res: Response, next: Function) {
+    console.log('Request...');
+    next();
+  }
+}
+在modules中使用
+export class AppModule implements NestModule {
+  configure(consumer: MiddlewareConsumer) {
+    consumer
+      .apply(LoggerMiddleware)
+      .forRoutes({ path: 'cats*', method: RequestMethod.GET }); // 指定路由全部为*,可以调用多次
+  }
+}
+
+```
+### decrator 装饰器
+自定义装饰器
+```
+import { SetMetadata } from '@nestjs/common';
+
+export const aaa = (value: string) => {
+  return SetMetadata('aaa', value);
+};
+
+在自定义装饰器里通过 applyDecorators 调用其他装饰器
+import { applyDecorators, Get, UseGuards } from '@nestjs/common';
+import { AaaGuard } from './aaa.guard';
+
+export function Bbb(path, role) {
+  return applyDecorators(
+    Get(path),
+    UseGuards(AaaGuard)
+  )
+}
+
+自定义参数装饰器
+import { createParamDecorator, ExecutionContext } from '@nestjs/common';
+
+export const Ccc = createParamDecorator(
+  (data: string, ctx: ExecutionContext) => {
+    return 'ccc';
+  },
+);
+类装饰器
+import { Controller } from '@nestjs/common';
+export const Ddd = (path: string) => {
+  return (target: any) => {
+    @Controller(path)
+    class DddController extends target {}
+    return DddController;
+  };
+};
+
+使用
+@Bbb('/bbb', 'admin')
+@Ccc('ccc')
+getBbb() {
+  return 'bbb';
+}
+
+
+
+```
 ### Guard 
 守卫 用于在调用某个 Controller 之前判断权限，返回 true 或者 false 来决定是否放行：
 ```
@@ -122,7 +188,7 @@ Nest 实现 AOP 的方式更多，一共有五种，包括 Middleware、Guard、
 @Injectable()
 class AuthGuard implements CanActivate {
   canActivate(context: ExecutionContext): boolean {
-    const request = context.switchToHttp().getRequest();
+    const request = context.switchToHttp().getRequest();//获取请求对象
     return validateRequest(request);
   }
 }
@@ -134,7 +200,16 @@ class AppController {}
 app.useGlobalGuards(new AuthGuard());
 ```
 ![image](/assets/aop.png)
+### ExecutionContext
+为了让 Filter、Guard、Exception Filter 支持 http、ws、rpc 等场景下复用，Nest 设计了 ArgumentHost 和 ExecutionContext 类。
 
+ArgumentHost 可以通过 getArgs 或者 getArgByIndex 拿到上下文参数，比如 request、response、next 等。
+
+更推荐的方式是根据 getType 的结果分别 switchToHttp、switchToWs、swtichToRpc，然后再取对应的 argument。
+
+而 ExecutionContext 还提供 getClass、getHandler 方法，可以结合 reflector 来取出其中的 metadata。
+
+在写 Filter、Guard、Exception Filter 的时候，是需要用到这些 api 的
 ### interceptor 拦截器
 拦截器是在调用某个 Controller 之前，对请求和响应进行处理的，它可以对请求和响应进行修改，也可以抛出异常来终止请求。
 ```

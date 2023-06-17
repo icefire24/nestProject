@@ -6,27 +6,31 @@ import {
   Patch,
   Param,
   Delete,
+  SetMetadata,
+  Inject,
+  ParseIntPipe,
 } from '@nestjs/common';
 import { TestService } from './test.service';
 import { CreateTestDto } from './dto/create-test.dto';
 import { UpdateTestDto } from './dto/update-test.dto';
+import { Reflector } from '@nestjs/core';
 
 @Controller('test')
 export class TestController {
   constructor(private readonly testService: TestService) {}
-
+  @Inject(Reflector)
+  private readonly reflect: Reflector;
   @Post()
   create(@Body() createTestDto: CreateTestDto) {
     return this.testService.create(createTestDto);
   }
-
-  @Get()
+  @Get('find')
   findAll() {
     return this.testService.findAll();
   }
 
   @Get(':id')
-  findOne(@Param('id') id: string) {
+  findOne(@Param('id', ParseIntPipe) id: string) {
     return this.testService.findOne(+id);
   }
 

@@ -15,6 +15,7 @@ import {
   UseFilters,
   HttpException,
   UseGuards,
+  SetMetadata,
 } from '@nestjs/common';
 import { PersonService } from './person.service';
 import { CreatePersonDto } from './dto/create-person.dto';
@@ -23,6 +24,7 @@ import { AnyFilesInterceptor } from '@nestjs/platform-express';
 import { TestService } from './../test/test.service';
 import { testException } from 'src/aop/httpException';
 import { MaxGuard } from 'src/aop/maxGuard';
+import { aaa, fnDec, myQuery } from 'src/aop/decrator';
 
 @Controller('person')
 export class PersonController {
@@ -56,14 +58,17 @@ export class PersonController {
     console.log('createPersonDto: ', createPersonDto);
     return this.personService.create(createPersonDto);
   }
-  @UseFilters(new testException())
+  @UseFilters(testException)
   @Get('test')
   findAll() {
     throw new HttpException('Forbidden', 403);
   }
-  @UseGuards(MaxGuard)
+  // @SetMetadata('roles', ['admin'])
+  // @aaa('admin')
+  // @UseGuards(MaxGuard)
+  @fnDec(MaxGuard, 'admin')
   @Get('find')
-  findOne(@Query('id') id: number) {
+  findOne(@myQuery('id') id: number) {
     return this.personService.findOne(+id);
   }
 
