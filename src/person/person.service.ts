@@ -1,26 +1,39 @@
 import { Injectable } from '@nestjs/common';
 import { CreatePersonDto } from './dto/create-person.dto';
 import { UpdatePersonDto } from './dto/update-person.dto';
+import { InjectEntityManager } from '@nestjs/typeorm';
+import { EntityManager } from 'typeorm';
+import { Person } from './entities/person.entity';
 
 @Injectable()
 export class PersonService {
+  @InjectEntityManager()
+  private manage: EntityManager;
+
   create(createPersonDto: CreatePersonDto) {
-    return `receive${JSON.stringify(createPersonDto)}`;
+    this.manage.save(Person, createPersonDto);
   }
 
   findAll() {
-    return `This action returns all person`;
+    return this.manage.find(Person);
   }
 
   findOne(id: number) {
-    return `This action returns a #${id} person`;
+    return this.manage.findOne(Person, {
+      where: {
+        id,
+      },
+    });
   }
 
   update(id: number, updatePersonDto: UpdatePersonDto) {
-    return `This action updates a #${id} person`;
+    return this.manage.save(Person, {
+      id,
+      ...updatePersonDto,
+    });
   }
 
   remove(id: number) {
-    return `This action removes a #${id} person`;
+    return this.manage.delete(Person, id);
   }
 }
