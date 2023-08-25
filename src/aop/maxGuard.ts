@@ -1,27 +1,32 @@
 import {
   CanActivate,
   ExecutionContext,
+  HttpException,
   Inject,
   Injectable,
+  UnauthorizedException,
 } from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
+import { JwtService } from '@nestjs/jwt';
 import { Request } from 'express';
 import { Observable } from 'rxjs';
 
 @Injectable()
-export class MaxGuard implements CanActivate {
+export class userGuard implements CanActivate {
   @Inject(Reflector)
   private reflect: Reflector;
+  @Inject(JwtService)
+  private jwtService: JwtService;
   canActivate(
     context: ExecutionContext,
   ): boolean | Promise<boolean> | Observable<boolean> {
     const request = context.switchToHttp().getRequest();
-    console.log(request.query.id);
-    console.log(this.reflect.get('aaa', context.getHandler()));
-    if (request.query.id > 10) {
-      return false;
-    } else {
+    const token = request.headers.authorization;
+    try {
+      const user = this.jwtService.verify(token);
       return true;
+    } catch (error) {
+      throw new UnauthorizedException('token失效，请重新登录');
     }
   }
 }

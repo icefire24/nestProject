@@ -23,7 +23,6 @@ import { UpdatePersonDto } from './dto/update-person.dto';
 import { AnyFilesInterceptor } from '@nestjs/platform-express';
 import { TestService } from './../test/test.service';
 import { testException } from 'src/aop/httpException';
-import { MaxGuard } from 'src/aop/maxGuard';
 import { aaa, fnDec, myQuery } from 'src/aop/decrator';
 
 @Controller('person')
@@ -66,7 +65,7 @@ export class PersonController {
   // @SetMetadata('roles', ['admin'])
   // @aaa('admin')
   // @UseGuards(MaxGuard)
-  @fnDec(MaxGuard, 'admin')
+  // @fnDec(MaxGuard, 'admin')
   @Get('find')
   findOne(@myQuery('id') id: number) {
     return this.personService.findOne(+id);
