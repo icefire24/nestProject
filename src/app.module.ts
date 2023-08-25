@@ -6,6 +6,7 @@ import { PersonModule } from './person/person.module';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { Person } from './person/entities/person.entity';
 import { UserModule } from './user/user.module';
+import { User } from './user/entities/user.entity';
 @Module({
   imports: [
     TestModule,
@@ -14,11 +15,11 @@ import { UserModule } from './user/user.module';
       host: 'localhost',
       port: 3306,
       username: 'root',
-      password: 'wbs123',
+      password: 'wang5224',
       database: 'practice',
       synchronize: true,
       logging: true,
-      entities: [Person],
+      entities: [User],
       poolSize: 10,
       connectorPackage: 'mysql2',
       extra: {
