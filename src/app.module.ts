@@ -8,6 +8,7 @@ import { Person } from './person/entities/person.entity';
 import { UserModule } from './user/user.module';
 import { User } from './user/entities/user.entity';
 import { JwtModule, JwtService } from '@nestjs/jwt';
+import { CaseModule } from './case/case.module';
 @Module({
   imports: [
     TestModule,
@@ -35,6 +36,8 @@ import { JwtModule, JwtService } from '@nestjs/jwt';
       },
     }),
     UserModule,
+    CaseModule,
+    TestModule,
   ],
   controllers: [AppController],
   providers: [AppService],

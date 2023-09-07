@@ -346,4 +346,22 @@ async function bootstrap() {
 bootstrap();
 ```
 
-###
+### session/cookie
+- npm install express-session @types/express-session
+-   app.use(session({
+    secret: 'guang',
+    resave: false,
+    saveUninitialized: false
+  }));
+  使用 express-session 中间件，指定加密的密钥 secret。
+
+resave 为 true 是每次访问都会更新 session，不管有没有修改 session 的内容，而 false 是只有 session 内容变了才会去更新 session。
+
+saveUninitalized 设置为 true 是不管是否设置 session，都会初始化一个空的 session 对象。比如你没有登录的时候，也会初始化一个 session 对象，这个设置为 false 就好。
+- controller 注入 session 对象
+  @Get('sss')
+sss(@Session() session) {
+    console.log(session)
+    session.count = session.count ? session.count + 1 : 1;
+    return session.count;
+}

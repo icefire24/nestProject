@@ -9,6 +9,7 @@ import {
   SetMetadata,
   Inject,
   ParseIntPipe,
+  Session,
 } from '@nestjs/common';
 import { TestService } from './test.service';
 import { CreateTestDto } from './dto/create-test.dto';
@@ -28,7 +29,12 @@ export class TestController {
   findAll() {
     return this.testService.findAll();
   }
-
+  @Get('sss')
+  sss(@Session() session) {
+    console.log(session);
+    session.count = session.count ? session.count + 1 : 1;
+    return session.count;
+  }
   @Get(':id')
   findOne(@Param('id', ParseIntPipe) id: string) {
     return this.testService.findOne(+id);
