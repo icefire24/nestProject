@@ -1,11 +1,15 @@
 import { EntityManager } from 'typeorm';
-import { HttpException, Inject, Injectable, UseGuards } from '@nestjs/common';
+import {
+  HttpException,
+  Inject,
+  Injectable,
+  UnauthorizedException,
+} from '@nestjs/common';
 import { Userdto } from './dto/userdto';
 import { InjectEntityManager } from '@nestjs/typeorm';
 import { User } from './entities/user.entity';
 import * as crypto from 'crypto';
 import { JwtService } from '@nestjs/jwt';
-import { userGuard } from 'src/aop/maxGuard';
 const md5 = (password) => {
   const hash = crypto.createHash('md5');
   hash.update(password);
@@ -31,7 +35,6 @@ export class UserService {
       this.manage.save(User, newUser);
       return '注册成功';
     } catch (error) {
-      console.log(error);
       return '注册失败';
     }
   }
@@ -46,15 +49,62 @@ export class UserService {
       throw new HttpException('密码错误', 203);
     }
     // 生成jwt token
-    const token = this.jwtService.signAsync({
-      user: {
-        id: user.id,
+    const token = this.jwtService.sign(
+      {
+        user: {
+          id: user.id,
+          userName: user.userName,
+        },
+      },
+      {
+        expiresIn: '1h',
+      },
+    );
+
+    //生成refresh token
+    const refreshToken = this.jwtService.sign(
+      {
         userName: user.userName,
       },
-    });
-    return token;
+      {
+        expiresIn: '7d',
+      },
+    );
+    return { token, refreshToken };
   }
+  async refresh(refresh_token: string) {
+    try {
+      const data = this.jwtService.verify(refresh_token);
+      const user = await this.manage.findOneBy(User, {
+        userName: data.userName,
+      });
+      // 生成jwt token
+      const token = this.jwtService.sign(
+        {
+          user: {
+            id: user.id,
+            userName: user.userName,
+          },
+        },
+        {
+          expiresIn: '1h',
+        },
+      );
 
+      //生成refresh token
+      const refreshToken = this.jwtService.sign(
+        {
+          userName: user.userName,
+        },
+        {
+          expiresIn: '7d',
+        },
+      );
+      return { token, refreshToken };
+    } catch (error) {
+      throw new UnauthorizedException('token过期，请重新登陆');
+    }
+  }
   findAll() {
     return this.manage.find(User);
   }

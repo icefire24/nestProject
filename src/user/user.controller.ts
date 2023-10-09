@@ -3,16 +3,13 @@ import {
   Get,
   Post,
   Body,
-  Patch,
-  Param,
-  Delete,
   UseGuards,
   ValidationPipe,
-  Res,
+  Query,
 } from '@nestjs/common';
 import { UserService } from './user.service';
 import { Userdto } from './dto/userdto';
-import { userGuard } from 'src/aop/maxGuard';
+import { LoginGuard } from 'src/login.guard';
 
 @Controller('user')
 export class UserController {
@@ -26,16 +23,22 @@ export class UserController {
   login(@Body(ValidationPipe) userdto: Userdto) {
     return this.userService.login(userdto);
   }
-
+  @Get('refresh')
+  refresh(@Query('refresh_token') refreshToken: string) {
+    return this.userService.refresh(refreshToken);
+  }
   @Get('all')
-  @UseGuards(userGuard)
+  @UseGuards(LoginGuard)
   findAll() {
     return this.userService.findAll();
   }
-
+  @Get('aaa')
+  @UseGuards(LoginGuard)
+  aaa() {
+    return 'aaa';
+  }
   @Get('bbb')
   bbb() {
-    console.log('bbb');
     return 'bbb';
   }
 }

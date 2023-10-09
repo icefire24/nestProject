@@ -17,6 +17,6 @@ export class Userdto {
   userName: string;
   @IsString()
   @IsNotEmpty()
-  @Length(6, 20)
+  @Length(2, 20)
   password: string;
 }

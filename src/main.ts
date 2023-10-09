@@ -13,11 +13,7 @@ async function bootstrap() {
     }),
   );
   app.useStaticAssets(join(__dirname, '..', 'public'), { prefix: '/static' });
-  app.enableCors({
-    origin: '*',
-    allowedHeaders: ['Authorization', 'content-type'],
-    methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
-  });
+  app.enableCors();
   await app.listen(3000);
   console.log('Server is running on http://localhost:3000');
 }
